@@ -4861,13 +4861,18 @@ TRIM_UP05E:			JSR		@TRIM_SELECT04
 					JSR		@TRIM_UP00
 					RTS
 					;
-UP_TRIM00:			JSR		@SCENE_SERCH01
+UP_TRIM00:			MOV.B	@SCENE_STATUS00,AL
+					PUSH	AX
 					;
+					JSR		@SCENE_SERCH01
 					JSR		@CHK_TRIM01
 					JSR		@CHK_TRIM02
 					JSR		@CHK_TRIM03
 					JSR		@CHK_TRIM04
-					JSR		@CHK_TRIM05					
+					JSR		@CHK_TRIM05
+					;
+					POP		AX	
+					MOV.B	AL,@SCENE_STATUS00				
 					RTS
 ;******************************************************************************
 ;*      00-NAME :
@@ -6286,9 +6291,9 @@ SW_TABLE01:			.DATA.W	D'0001			;1
 					.DATA.L	SW_MONI17
 					;
 					.DATA.W	D'0018			;ALL MAX
-					.DATA.L	SW_MONI18
+					.DATA.L	SW_MONI19		;SW_MONI18
 					.DATA.W	D'0019			;ALL MIN
-					.DATA.L	SW_MONI19
+					.DATA.L	SW_MONI18		;SW_MONI19
 					;
 					.DATA.W	D'0020			;SCENE 1
 					.DATA.L	SW_MONI20		;SW_MONI_R		;SW_MONI20
