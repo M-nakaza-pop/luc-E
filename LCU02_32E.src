@@ -3827,8 +3827,8 @@ SW_MONI13:
 SW_MONI14:
 SW_MONI15:
 SW_MONI16:
-SW_MONI17:
-SW_MONI19:		RTS
+SW_MONI17:		RTS
+
 ;
 SW_MONI35:		CCF
 				MOV.B	@LT1_SW,AH
@@ -3936,14 +3936,19 @@ SW_MONI34:		MOV.B	@FAN_STATUS00,AH
 				BRA		SW_CCF00
 				;
 SW_MONI18:		MOV.B	@SCENE_STATUS00,AH			;ALL_MIN "D'19"
-				CMP.B	#D'07,AH
+				CMP.B	#D'07,AH					;ALL_MIN "7"
 				BEQ		SW_SCF00
-				CMP.B	#D'06,AH					;ALL_MAX "D'18"
-				BEQ		SW_SCF00
+				;CMP.B	#D'06,AH					;ALL_MAX "D'18"
+				;BEQ		SW_SCF00				;max,minóºï˚ì_ìî
 SW_CCF00:		CCF
 				RTS
 SW_SCF00:		SCF
 				RTS
+				;
+SW_MONI19:		MOV.B	@SCENE_STATUS00,AH
+				CMP.B	#D'06,AH
+				BEQ		SW_SCF00
+				BRA		SW_CCF00
 				;
 				;
 SCF_CHK00:		BEQ		SCF_CHK01
@@ -4861,13 +4866,18 @@ TRIM_UP05E:			JSR		@TRIM_SELECT04
 					JSR		@TRIM_UP00
 					RTS
 					;
-UP_TRIM00:			JSR		@SCENE_SERCH01
+UP_TRIM00:			MOV.B	@SCENE_STATUS00,AL
+					PUSH	AX
 					;
+					JSR		@SCENE_SERCH01
 					JSR		@CHK_TRIM01
 					JSR		@CHK_TRIM02
 					JSR		@CHK_TRIM03
 					JSR		@CHK_TRIM04
-					JSR		@CHK_TRIM05					
+					JSR		@CHK_TRIM05
+					;
+					POP		AX
+					MOV.B	AL,@SCENE_STATUS00					
 					RTS
 ;******************************************************************************
 ;*      00-NAME :
@@ -4953,14 +4963,20 @@ SCENE_SERCH05:		CMP.B	#05,AL
 					JSR		@INI_READ00
 					RTS
 					;
-SCENE_SERCH00:		JSR		@TRIM_UP01
+					;
+SCENE_SERCH00:		CMP.B	#06,AL
+					BEQ		SCENE_SERCH99
+					CMP.B	#07,AL
+					BEQ		SCENE_SERCH99
+					;
+					JSR		@TRIM_UP01
 					JSR		@TRIM_UP02
 					JSR		@TRIM_UP03
 					JSR		@TRIM_UP04
 					JSR		@TRIM_UP05
 					;
 					POP.W	AX						;-STACK
-					RTS	
+SCENE_SERCH99:		RTS	
 ;******************************************************************************
 ;*      00-NAME :
 ;*      èàóùäTóv:
@@ -5021,11 +5037,17 @@ TRIM_DOWN05:		JSR		@SCENE_CAN00
 					JSR		@TRIM_DOWN00
 					RTS
 					;
-DOWN_TRIM00:		JSR		@TRIM_DOWN01
+DOWN_TRIM00:		MOV.B	@SCENE_STATUS00,AL
+					PUSH	AX
+					;
+					JSR		@TRIM_DOWN01
 					JSR		@TRIM_DOWN02
 					JSR		@TRIM_DOWN03
 					JSR		@TRIM_DOWN04
 					JSR		@TRIM_DOWN05
+					;
+					POP		AX
+					MOV.B	AL,@SCENE_STATUS00	
 					RTS
 ;******************************************************************************
 ;*      00-NAME :
@@ -6286,9 +6308,9 @@ SW_TABLE01:			.DATA.W	D'0001			;1
 					.DATA.L	SW_MONI17
 					;
 					.DATA.W	D'0018			;ALL MAX
-					.DATA.L	SW_MONI18
+					.DATA.L	SW_MONI19		;SW_MONI18
 					.DATA.W	D'0019			;ALL MIN
-					.DATA.L	SW_MONI19
+					.DATA.L	SW_MONI18		;SW_MONI19
 					;
 					.DATA.W	D'0020			;SCENE 1
 					.DATA.L	SW_MONI20		;SW_MONI_R		;SW_MONI20
